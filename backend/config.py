@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     
     # AI Configuration
     google_api_key: Optional[str] = None  # Make optional for deployment
-    ai_model: str = "gemini-1.5-flash"  # Stable model with better free tier quotas
+    ai_model: str = "gemini-1.5-flash-latest"  # Use -latest suffix for v1beta API
     ai_temperature: float = 0.7
     ai_max_tokens: int = 2048
     ai_timeout: int = 30
