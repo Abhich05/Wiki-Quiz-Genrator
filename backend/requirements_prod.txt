@@ -17,6 +17,9 @@ html2text>=2020.1.0
 
 # Utilities
 python-dotenv>=1.0.0
+tenacity>=8.2.3
 
-# Security & Performance (optional for Windows)
+# Security & Performance
 python-multipart>=0.0.6
+slowapi>=0.1.9
+prometheus-client>=0.19.0
