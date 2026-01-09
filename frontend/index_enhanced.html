@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wikipedia Quiz Generator - Enhanced</title>
+    <link rel="stylesheet" href="style_enhanced.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>📚 Wikipedia Quiz Generator</h1>
+                <p class="subtitle">Generate AI-powered quizzes from Wikipedia articles with entity extraction and history tracking</p>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="generate" onclick="switchTab('generate')">
+                <span class="tab-icon">✨</span>
+                <span>Generate Quiz</span>
+            </button>
+            <button class="tab-btn" data-tab="history" onclick="switchTab('history')">
+                <span class="tab-icon">📜</span>
+                <span>Past Quizzes</span>
+            </button>
+        </nav>
+
+        <!-- Tab 1: Generate Quiz -->
+        <div id="generate-tab" class="tab-content active">
+            <!-- URL Input Section -->
+            <section class="input-section">
+                <div class="input-container">
+                    <label for="wiki-url" class="input-label">Wikipedia Article URL</label>
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="wiki-url" 
+                            class="url-input"
+                            placeholder="https://en.wikipedia.org/wiki/Artificial_intelligence"
+                            value="">
+                        <button id="generate-btn" class="btn-primary" onclick="generateQuiz()">
+                            <span class="btn-text">Generate Quiz</span>
+                            <span class="btn-spinner" style="display: none;">⏳ Generating...</span>
+                        </button>
+                    </div>
+                    <p class="input-hint">💡 Example: https://en.wikipedia.org/wiki/Python_(programming_language)</p>
+                </div>
+            </section>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="loading-container" style="display: none;">
+                <div class="spinner"></div>
+                <p>Extracting content, analyzing entities, and generating quiz questions...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-state" class="error-container" style="display: none;">
+                <div class="error-icon">⚠️</div>
+                <h3>Error</h3>
+                <p id="error-message"></p>
+                <button onclick="clearError()" class="btn-secondary">Try Again</button>
+            </div>
+
+            <!-- Quiz Display Section -->
+            <div id="quiz-display" class="quiz-display" style="display: none;">
+                <!-- Article Header -->
+                <section class="article-header">
+                    <h2 id="article-title" class="article-title"></h2>
+                    <p id="article-summary" class="article-summary"></p>
+                    <div class="article-meta">
+                        <span class="meta-item">
+                            <span class="meta-icon">🔗</span>
+                            <a id="article-url" href="#" target="_blank" class="article-link">View on Wikipedia</a>
+                        </span>
+                        <span class="meta-item">
+                            <span class="meta-icon">📊</span>
+                            <span id="question-count">0 questions</span>
+                        </span>
+                    </div>
+                </section>
+
+                <!-- Key Entities Section -->
+                <section class="entities-section">
+                    <h3 class="section-title">🔍 Key Entities Extracted</h3>
+                    <div class="entities-grid">
+                        <div class="entity-group">
+                            <h4 class="entity-group-title">👤 People</h4>
+                            <div id="people-entities" class="entity-tags"></div>
+                        </div>
+                        <div class="entity-group">
+                            <h4 class="entity-group-title">🏢 Organizations</h4>
+                            <div id="org-entities" class="entity-tags"></div>
+                        </div>
+                        <div class="entity-group">
+                            <h4 class="entity-group-title">📍 Locations</h4>
+                            <div id="location-entities" class="entity-tags"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sections Section -->
+                <section class="sections-section">
+                    <h3 class="section-title">📑 Article Sections</h3>
+                    <div id="sections-container" class="sections-grid"></div>
+                </section>
+
+                <!-- Quiz Actions -->
+                <section class="quiz-actions">
+                    <button onclick="startTakingQuiz()" class="btn-primary btn-large">
+                        📝 Take the Quiz
+                    </button>
+                    <button onclick="viewAsStudyGuide()" class="btn-secondary">
+                        📖 View as Study Guide
+                    </button>
+                </section>
+
+                <!-- Study Guide Mode (shows questions with answers) -->
+                <div id="study-guide" style="display: none;">
+                    <h3 class="section-title">📖 Study Guide (All Questions with Answers)</h3>
+                    <div id="study-questions" class="questions-container"></div>
+                </div>
+
+                <!-- Related Topics Section -->
+                <section class="related-section">
+                    <h3 class="section-title">🔗 Related Topics to Explore</h3>
+                    <div id="related-topics" class="related-grid"></div>
+                </section>
+            </div>
+
+            <!-- Quiz Taking Mode -->
+            <div id="quiz-taking" class="quiz-taking-mode" style="display: none;">
+                <div class="quiz-header">
+                    <h2>📝 Take the Quiz</h2>
+                    <div class="quiz-progress">
+                        <span id="progress-text">Question 1 of 10</span>
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="quiz-questions-container" class="quiz-questions"></div>
+                
+                <div class="quiz-actions">
+                    <button onclick="exitQuiz()" class="btn-secondary">Exit Quiz</button>
+                    <button onclick="submitQuizAnswers()" class="btn-primary btn-large">Submit Answers</button>
+                </div>
+            </div>
+
+            <!-- Quiz Results -->
+            <div id="quiz-results" class="quiz-results" style="display: none;">
+                <div class="results-card">
+                    <div class="results-header">
+                        <h2>🎉 Quiz Complete!</h2>
+                    </div>
+                    
+                    <div class="score-display">
+                        <div class="score-circle">
+                            <svg class="score-ring" width="200" height="200">
+                                <circle class="score-ring-bg" cx="100" cy="100" r="90"></circle>
+                                <circle id="score-ring-fill" class="score-ring-fill" cx="100" cy="100" r="90"></circle>
+                            </svg>
+                            <div class="score-text">
+                                <div class="score-percentage" id="result-percentage">0%</div>
+                                <div class="score-fraction" id="result-fraction">0/0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="results-details" id="results-details"></div>
+
+                    <div class="results-actions">
+                        <button onclick="retakeQuiz()" class="btn-primary">🔄 Retake Quiz</button>
+                        <button onclick="backToArticle()" class="btn-secondary">← Back to Article</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: History -->
+        <div id="history-tab" class="tab-content">
+            <section class="history-section">
+                <div class="history-header">
+                    <h2>📜 Quiz History</h2>
+                    <button onclick="refreshHistory()" class="btn-refresh">
+                        <span class="refresh-icon">🔄</span> Refresh
+                    </button>
+                </div>
+
+                <!-- Loading State -->
+                <div id="history-loading" class="loading-container" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Loading quiz history...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="history-empty" class="empty-state" style="display: none;">
+                    <div class="empty-icon">📭</div>
+                    <h3>No Quizzes Yet</h3>
+                    <p>Generate your first quiz to see it appear here!</p>
+                    <button onclick="switchTab('generate')" class="btn-primary">Generate Quiz</button>
+                </div>
+
+                <!-- History Table -->
+                <div id="history-table-wrapper" class="table-wrapper" style="display: none;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>URL</th>
+                                <th>Questions</th>
+                                <th>Generated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modal for Quiz Details -->
+    <div id="quiz-modal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeQuizModal()"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="modal-title">Quiz Details</h2>
+                <button class="modal-close" onclick="closeQuizModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer">
+                <button onclick="closeQuizModal()" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app_enhanced.js"></script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+{
+  "id": 1,
+  "url": "https://en.wikipedia.org/wiki/Artificial_intelligence",
+  "title": "Artificial intelligence",
+  "summary": "Artificial intelligence (AI) is intelligence demonstrated by machines, in contrast to the natural intelligence displayed by humans and animals. Leading AI textbooks define the field as the study of intelligent agents: any device that perceives its environment and takes actions that maximize its chance of successfully achieving its goals.",
+  "key_entities": {
+    "people": [
+      "Alan Turing",
+      "John McCarthy",
+      "Marvin Minsky",
+      "Herbert Simon",
+      "Allen Newell",
+      "Geoffrey Hinton",
+      "Yann LeCun",
+      "Yoshua Bengio"
+    ],
+    "organizations": [
+      "MIT",
+      "Stanford University",
+      "Carnegie Mellon University",
+      "DeepMind",
+      "OpenAI",
+      "Google",
+      "IBM",
+      "Microsoft Research"
+    ],
+    "locations": [
+      "United States",
+      "United Kingdom",
+      "Canada",
+      "China",
+      "Europe"
+    ]
+  },
+  "sections": [
+    {
+      "title": "History",
+      "level": 2
+    },
+    {
+      "title": "Early AI research",
+      "level": 3
+    },
+    {
+      "title": "Goals",
+      "level": 2
+    },
+    {
+      "title": "Approaches",
+      "level": 2
+    },
+    {
+      "title": "Machine learning",
+      "level": 3
+    },
+    {
+      "title": "Deep learning",
+      "level": 3
+    },
+    {
+      "title": "Natural language processing",
+      "level": 3
+    },
+    {
+      "title": "Applications",
+      "level": 2
+    },
+    {
+      "title": "Healthcare",
+      "level": 3
+    },
+    {
+      "title": "Automotive",
+      "level": 3
+    },
+    {
+      "title": "Ethics and risks",
+      "level": 2
+    },
+    {
+      "title": "Bias and fairness",
+      "level": 3
+    },
+    {
+      "title": "Future",
+      "level": 2
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Who is credited with coining the term 'artificial intelligence' in 1956?",
+      "option_a": "Alan Turing",
+      "option_b": "John McCarthy",
+      "option_c": "Marvin Minsky",
+      "option_d": "Herbert Simon",
+      "correct_answer": "B",
+      "explanation": "John McCarthy coined the term 'artificial intelligence' at the Dartmouth Conference in 1956, where he organized a summer research project that is considered the birth of AI as a field. This information is found in the 'History' section of the article.",
+      "difficulty": "Easy",
+      "section_reference": "History"
+    },
+    {
+      "question": "What is the Turing Test designed to evaluate?",
+      "option_a": "A computer's processing speed",
+      "option_b": "A machine's ability to exhibit intelligent behavior indistinguishable from a human",
+      "option_c": "The efficiency of an algorithm",
+      "option_d": "The memory capacity of a system",
+      "correct_answer": "B",
+      "explanation": "Alan Turing proposed the Turing Test in 1950 as a measure of a machine's ability to exhibit intelligent behavior equivalent to, or indistinguishable from, that of a human. If a human evaluator cannot reliably tell the machine from a human based on conversational responses, the machine is said to have passed the test. This concept is discussed in the 'History' section.",
+      "difficulty": "Easy",
+      "section_reference": "History"
+    },
+    {
+      "question": "Which AI approach involves training algorithms on large datasets to learn patterns?",
+      "option_a": "Expert systems",
+      "option_b": "Symbolic AI",
+      "option_c": "Machine learning",
+      "option_d": "Logic programming",
+      "correct_answer": "C",
+      "explanation": "Machine learning is the approach where algorithms learn from and make predictions or decisions based on data. Rather than being explicitly programmed, ML systems improve their performance on a specific task through experience. This is explained in the 'Machine learning' subsection under 'Approaches'.",
+      "difficulty": "Easy",
+      "section_reference": "Approaches → Machine learning"
+    },
+    {
+      "question": "What distinguishes deep learning from traditional machine learning?",
+      "option_a": "It requires less data to train",
+      "option_b": "It uses neural networks with multiple layers to learn hierarchical representations",
+      "option_c": "It can only be used for image recognition",
+      "option_d": "It doesn't require computing power",
+      "correct_answer": "B",
+      "explanation": "Deep learning uses artificial neural networks with multiple layers (hence 'deep') that progressively extract higher-level features from raw input. For example, in image processing, lower layers may identify edges, while higher layers identify more complex concepts like objects. This architectural difference is detailed in the 'Deep learning' subsection.",
+      "difficulty": "Medium",
+      "section_reference": "Approaches → Deep learning"
+    },
+    {
+      "question": "Which three researchers are often called the 'godfathers of deep learning' for their contributions to neural networks?",
+      "option_a": "Geoffrey Hinton, Yann LeCun, and Yoshua Bengio",
+      "option_b": "Alan Turing, John McCarthy, and Marvin Minsky",
+      "option_c": "Bill Gates, Steve Jobs, and Elon Musk",
+      "option_d": "Herbert Simon, Allen Newell, and Claude Shannon",
+      "correct_answer": "A",
+      "explanation": "Geoffrey Hinton, Yann LeCun, and Yoshua Bengio are collectively known as the 'godfathers of deep learning' for their pioneering work in neural networks and deep learning. They received the 2018 Turing Award for their contributions. This information appears in the 'Deep learning' subsection.",
+      "difficulty": "Medium",
+      "section_reference": "Approaches → Deep learning"
+    },
+    {
+      "question": "In the context of AI healthcare applications mentioned in the article, what capability has AI demonstrated?",
+      "option_a": "Replacing all human doctors",
+      "option_b": "Diagnosing certain diseases as accurately as human experts",
+      "option_c": "Performing surgery without any human supervision",
+      "option_d": "Eliminating all medical errors",
+      "correct_answer": "B",
+      "explanation": "The article discusses how AI systems have demonstrated the ability to diagnose certain diseases, such as diabetic retinopathy and skin cancer, with accuracy comparable to or sometimes exceeding that of human experts. However, AI is intended to assist rather than replace healthcare professionals. This is covered in the 'Healthcare' subsection under 'Applications'.",
+      "difficulty": "Medium",
+      "section_reference": "Applications → Healthcare"
+    },
+    {
+      "question": "What is algorithmic bias in AI systems?",
+      "option_a": "When AI systems work faster than humans",
+      "option_b": "When AI systems consume too much power",
+      "option_c": "When AI systems produce systematically prejudiced results due to biased training data or design",
+      "option_d": "When AI systems make random errors",
+      "correct_answer": "C",
+      "explanation": "Algorithmic bias occurs when AI systems produce results that are systematically prejudiced due to erroneous assumptions in the machine learning process. This can stem from biased training data, biased algorithm design, or biased interpretation of results. The article discusses this issue in the 'Bias and fairness' subsection under 'Ethics and risks'.",
+      "difficulty": "Medium",
+      "section_reference": "Ethics and risks → Bias and fairness"
+    },
+    {
+      "question": "According to the article, what major AI achievement occurred in 2016 involving DeepMind?",
+      "option_a": "Creation of ChatGPT",
+      "option_b": "AlphaGo defeating a world champion Go player",
+      "option_c": "First self-driving car",
+      "option_d": "Discovery of new antibiotics",
+      "correct_answer": "B",
+      "explanation": "In 2016, DeepMind's AlphaGo program defeated Lee Sedol, one of the world's top Go players, in a five-game match. This was considered a landmark achievement because Go is exponentially more complex than chess, with more possible board positions than atoms in the observable universe. This milestone is discussed in the 'History' section.",
+      "difficulty": "Hard",
+      "section_reference": "History"
+    },
+    {
+      "question": "What is the 'AI winter' phenomenon mentioned in the article?",
+      "option_a": "A period when AI research is conducted only in cold climates",
+      "option_b": "A period of reduced funding and interest in AI research following unfulfilled promises",
+      "option_c": "A time when AI systems stop working",
+      "option_d": "The season when AI conferences are held",
+      "correct_answer": "B",
+      "explanation": "An 'AI winter' refers to a period of reduced funding and interest in artificial intelligence research. The article mentions that AI has experienced several such winters, notably in the 1970s and late 1980s, when the field failed to deliver on exaggerated promises and expectations. These periods led to significant cuts in funding and skepticism about AI's potential. This historical context is provided in the 'History' section.",
+      "difficulty": "Hard",
+      "section_reference": "History"
+    },
+    {
+      "question": "Based on the article's discussion of AI risks, which concern involves AI systems potentially operating beyond human control?",
+      "option_a": "Technological unemployment",
+      "option_b": "Privacy violations",
+      "option_c": "Existential risk from superintelligent AI",
+      "option_d": "Algorithmic bias",
+      "correct_answer": "C",
+      "explanation": "The article discusses existential risk as a concern about superintelligent AI—systems that surpass human intelligence across all domains. Some researchers worry that if such systems are created without proper safety measures, they could operate beyond human control and pose catastrophic risks. This differs from more immediate concerns like job displacement or bias. This topic is explored in the 'Ethics and risks' section.",
+      "difficulty": "Hard",
+      "section_reference": "Ethics and risks"
+    }
+  ],
+  "related_topics": [
+    "Machine learning",
+    "Neural network",
+    "Deep learning",
+    "Natural language processing",
+    "Computer vision",
+    "Robotics",
+    "Expert system",
+    "Turing test"
+  ]
+}

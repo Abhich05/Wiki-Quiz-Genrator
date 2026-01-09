@@ -1,0 +1,13 @@
+# Database models for quiz storage
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+alembic>=1.13.0
+
+# NLP and entity extraction
+spacy>=3.7.0
+langchain>=0.1.0
+langchain-google-genai>=0.0.6
+
+# Enhanced scraping
+lxml>=4.9.0
+python-dateutil>=2.8.0
