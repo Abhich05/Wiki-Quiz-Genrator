@@ -3,7 +3,7 @@ services:
     name: wiki-quiz-generator
     runtime: python
     plan: free
-    buildCommand: "pip install --upgrade pip && pip install -r backend/requirements.txt"
+    buildCommand: "pip install --upgrade pip && pip install -r backend/requirements_prod.txt"
     startCommand: "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
