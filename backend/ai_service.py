@@ -193,7 +193,7 @@ Return ONLY valid JSON with no markdown formatting or extra text. Ensure all str
   ]
 }}
 
-Generate the quiz now in valid JSON format:
+Generate the quiz now in valid JSON format:"""
         
         return prompt
     
