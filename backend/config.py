@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     workers: int = 4
     
     # AI Configuration
-    google_api_key: Optional[str] = None  # Make optional for deployment
-    ai_model: str = "gemini-1.5-flash-latest"  # Use -latest suffix for v1beta API
+    google_api_key: Optional[str] = None  
+    ai_model: str = "gemini-2.5-flash"  
     ai_temperature: float = 0.7
     ai_max_tokens: int = 2048
     ai_timeout: int = 30
@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     # Security
     cors_origins: list[str] = ["*"]
     allowed_hosts: list[str] = ["*"]
-    secret_key: str = "change-this-in-production-super-secret-key-123"
+    secret_key: str = "a-very-secret-key"
     
     # Monitoring & Logging
     log_level: str = "INFO"
