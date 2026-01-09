@@ -3,387 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wiki Quiz Generator - AI-Powered Learning</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .glass {
-            backdrop-filter: blur(16px) saturate(180%);
-            background-color: rgba(255, 255, 255, 0.75);
-            border: 1px solid rgba(209, 213, 219, 0.3);
-        }
-        
-        .question-card {
-            transition: all 0.3s ease;
-        }
-        
-        .question-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        
-        .option-btn {
-            transition: all 0.2s ease;
-        }
-        
-        .option-btn:hover {
-            transform: translateX(4px);
-        }
-        
-        .correct-answer {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-        
-        .wrong-answer {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-        }
-        
-        .loading-spinner {
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    <title>Wikipedia Quiz Generator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
-    <header class="gradient-bg text-white shadow-lg">
-        <div class="container mx-auto px-4 py-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold">Wiki Quiz Generator</h1>
-                    <p class="text-blue-100 mt-1">AI-Powered Learning from Wikipedia</p>
-                </div>
-                <div class="text-right">
-                    <div class="text-sm text-blue-100">Powered by</div>
-                    <div class="font-semibold">Google Gemini AI</div>
-                </div>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>Wikipedia Quiz Generator</h1>
+                <p class="subtitle">Generate AI-powered quizzes from Wikipedia articles with entity extraction and history tracking</p>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
-        <!-- Generator Section -->
-        <section id="generator" class="mb-12 fade-in">
-            <div class="max-w-3xl mx-auto glass rounded-2xl shadow-xl p-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Generate Your Quiz</h2>
-                
-                <form id="quizForm" class="space-y-6">
-                    <!-- Wikipedia URL -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Wikipedia Article URL
-                        </label>
+        <!-- Tab Navigation -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="generate" onclick="switchTab('generate')">
+                <span class="tab-icon">✨</span>
+                <span>Generate Quiz</span>
+            </button>
+            <button class="tab-btn" data-tab="history" onclick="switchTab('history')">
+                <span class="tab-icon">📜</span>
+                <span>Past Quizzes</span>
+            </button>
+        </nav>
+
+        <!-- Tab 1: Generate Quiz -->
+        <div id="generate-tab" class="tab-content active">
+            <!-- URL Input Section -->
+            <section class="input-section">
+                <div class="input-container">
+                    <label for="wiki-url" class="input-label">Wikipedia Article URL</label>
+                    <div class="input-group">
                         <input 
-                            type="url" 
-                            id="wikipediaUrl" 
-                            required
-                            placeholder="https://en.wikipedia.org/wiki/Python_(programming_language)"
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                        />
-                        <p class="mt-2 text-sm text-gray-500">Enter any Wikipedia article URL to generate a quiz</p>
+                            type="text" 
+                            id="wiki-url" 
+                            class="url-input"
+                            placeholder="https://en.wikipedia.org/wiki/Artificial_intelligence"
+                            value="">
+                        <button id="generate-btn" class="btn-primary" onclick="generateQuiz()">
+                            <span class="btn-text">Generate Quiz</span>
+                            <span class="btn-spinner" style="display: none;">⏳ Generating...</span>
+                        </button>
                     </div>
+                    <p class="input-hint">Example: https://en.wikipedia.org/wiki/Python_(programming_language)</p>
+                </div>
+            </section>
 
-                    <!-- Settings Row -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Number of Questions -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Number of Questions
-                            </label>
-                            <select 
-                                id="numQuestions" 
-                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                            >
-                                <option value="3">3 Questions</option>
-                                <option value="5" selected>5 Questions</option>
-                                <option value="10">10 Questions</option>
-                                <option value="15">15 Questions</option>
-                                <option value="20">20 Questions</option>
-                            </select>
+            <!-- Loading State -->
+            <div id="loading-state" class="loading-container" style="display: none;">
+                <div class="spinner"></div>
+                <p>Extracting content, analyzing entities, and generating quiz questions...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-state" class="error-container" style="display: none;">
+                <div class="error-icon">⚠️</div>
+                <h3>Error</h3>
+                <p id="error-message"></p>
+                <button onclick="clearError()" class="btn-secondary">Try Again</button>
+            </div>
+
+            <!-- Quiz Display Section -->
+            <div id="quiz-display" class="quiz-display" style="display: none;">
+                <!-- Article Header -->
+                <section class="article-header">
+                    <h2 id="article-title" class="article-title"></h2>
+                    <p id="article-summary" class="article-summary"></p>
+                    <div class="article-meta">
+                        <span class="meta-item">
+                            <span class="meta-icon">🔗</span>
+                            <a id="article-url" href="#" target="_blank" class="article-link">View on Wikipedia</a>
+                        </span>
+                        <span class="meta-item">
+                            <span class="meta-icon">📊</span>
+                            <span id="question-count">0 questions</span>
+                        </span>
+                    </div>
+                </section>
+
+                <!-- Key Entities Section -->
+                <section class="entities-section">
+                    <h3 class="section-title">🔍 Key Entities Extracted</h3>
+                    <div class="entities-grid">
+                        <div class="entity-group">
+                            <h4 class="entity-group-title">👤 People</h4>
+                            <div id="people-entities" class="entity-tags"></div>
                         </div>
-
-                        <!-- Difficulty -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Difficulty Level
-                            </label>
-                            <select 
-                                id="difficulty" 
-                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                            >
-                                <option value="easy">Easy - Basic Facts</option>
-                                <option value="medium" selected>Medium - Concepts</option>
-                                <option value="hard">Hard - Analysis</option>
-                            </select>
+                        <div class="entity-group">
+                            <h4 class="entity-group-title">🏢 Organizations</h4>
+                            <div id="org-entities" class="entity-tags"></div>
+                        </div>
+                        <div class="entity-group">
+                            <h4 class="entity-group-title">📍 Locations</h4>
+                            <div id="location-entities" class="entity-tags"></div>
                         </div>
                     </div>
+                </section>
 
-                    <!-- Generate Button -->
-                    <button 
-                        type="submit" 
-                        id="generateBtn"
-                        class="w-full gradient-bg text-white font-semibold py-4 rounded-lg hover:opacity-90 transition shadow-lg"
-                    >
-                        🚀 Generate Quiz with AI
+                <!-- Sections Section -->
+                <section class="sections-section">
+                    <h3 class="section-title">📑 Article Sections</h3>
+                    <div id="sections-container" class="sections-grid"></div>
+                </section>
+
+                <!-- Quiz Actions -->
+                <section class="quiz-actions">
+                    <button onclick="startTakingQuiz()" class="btn-primary btn-large">
+                        📝 Take the Quiz
                     </button>
-                </form>
-
-                <!-- Quick Examples -->
-                <div class="mt-6 pt-6 border-t border-gray-200">
-                    <p class="text-sm font-medium text-gray-700 mb-3">Quick Examples:</p>
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="setExample('Python_(programming_language)')" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition">
-                            Python
-                        </button>
-                        <button onclick="setExample('Artificial_intelligence')" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition">
-                            AI
-                        </button>
-                        <button onclick="setExample('Quantum_computing')" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition">
-                            Quantum Computing
-                        </button>
-                        <button onclick="setExample('Machine_learning')" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition">
-                            Machine Learning
-                        </button>
-                        <button onclick="setExample('Climate_change')" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition">
-                            Climate Change
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Loading Section -->
-        <section id="loading" class="hidden mb-12">
-            <div class="max-w-3xl mx-auto glass rounded-2xl shadow-xl p-12 text-center fade-in">
-                <div class="loading-spinner mx-auto mb-6"></div>
-                <h3 class="text-xl font-semibold text-gray-800 mb-2">Generating Your Quiz...</h3>
-                <p class="text-gray-600">AI is analyzing the Wikipedia article and creating questions</p>
-                <p class="text-sm text-gray-500 mt-4">This usually takes 10-20 seconds</p>
-            </div>
-        </section>
-
-        <!-- Quiz Section -->
-        <section id="quizSection" class="hidden fade-in">
-            <div class="max-w-4xl mx-auto">
-                <!-- Quiz Header -->
-                <div class="glass rounded-2xl shadow-xl p-6 mb-6">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-800 mb-1" id="quizTitle"></h2>
-                            <p class="text-gray-600" id="quizMeta"></p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-3xl font-bold text-purple-600" id="score">0/0</div>
-                            <div class="text-sm text-gray-500">Score</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Questions Container -->
-                <div id="questionsContainer" class="space-y-6"></div>
-
-                <!-- Results Section -->
-                <div id="results" class="hidden glass rounded-2xl shadow-xl p-8 text-center fade-in">
-                    <div class="text-6xl mb-4">🎉</div>
-                    <h3 class="text-3xl font-bold text-gray-800 mb-2">Quiz Complete!</h3>
-                    <div class="text-5xl font-bold gradient-bg bg-clip-text text-transparent mb-6" id="finalScore"></div>
-                    <p class="text-gray-600 mb-8" id="resultMessage"></p>
-                    <button 
-                        onclick="location.reload()" 
-                        class="gradient-bg text-white font-semibold px-8 py-3 rounded-lg hover:opacity-90 transition"
-                    >
-                        Generate Another Quiz
+                    <button onclick="viewAsStudyGuide()" class="btn-secondary">
+                        📖 View as Study Guide
                     </button>
+                </section>
+
+                <!-- Study Guide Mode (shows questions with answers) -->
+                <div id="study-guide" style="display: none;">
+                    <h3 class="section-title">📖 Study Guide (All Questions with Answers)</h3>
+                    <div id="study-questions" class="questions-container"></div>
+                </div>
+
+                <!-- Related Topics Section -->
+                <section class="related-section">
+                    <h3 class="section-title">🔗 Related Topics to Explore</h3>
+                    <div id="related-topics" class="related-grid"></div>
+                </section>
+            </div>
+
+            <!-- Quiz Taking Mode -->
+            <div id="quiz-taking" class="quiz-taking-mode" style="display: none;">
+                <div class="quiz-header">
+                    <h2>📝 Take the Quiz</h2>
+                    <div class="quiz-progress">
+                        <span id="progress-text">Question 1 of 10</span>
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="quiz-questions-container" class="quiz-questions"></div>
+                
+                <div class="quiz-actions">
+                    <button onclick="exitQuiz()" class="btn-secondary">Exit Quiz</button>
+                    <button onclick="submitQuizAnswers()" class="btn-primary btn-large">Submit Answers</button>
                 </div>
             </div>
-        </section>
-    </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-16">
-        <div class="container mx-auto px-4 py-6 text-center text-gray-600">
-            <p>Wiki Quiz Generator - Powered by Google Gemini AI & Wikipedia</p>
-            <p class="text-sm mt-2">Generate unlimited quizzes from any Wikipedia article</p>
+            <!-- Quiz Results -->
+            <div id="quiz-results" class="quiz-results" style="display: none;">
+                <div class="results-card">
+                    <div class="results-header">
+                        <h2>🎉 Quiz Complete!</h2>
+                    </div>
+                    
+                    <div class="score-display">
+                        <div class="score-circle">
+                            <svg class="score-ring" width="200" height="200">
+                                <circle class="score-ring-bg" cx="100" cy="100" r="90"></circle>
+                                <circle id="score-ring-fill" class="score-ring-fill" cx="100" cy="100" r="90"></circle>
+                            </svg>
+                            <div class="score-text">
+                                <div class="score-percentage" id="result-percentage">0%</div>
+                                <div class="score-fraction" id="result-fraction">0/0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="results-details" id="results-details"></div>
+
+                    <div class="results-actions">
+                        <button onclick="retakeQuiz()" class="btn-primary">🔄 Retake Quiz</button>
+                        <button onclick="backToArticle()" class="btn-secondary">← Back to Article</button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </footer>
 
-    <script>
-        const API_BASE = 'https://wiki-quiz-genrator-btjx.onrender.com';
-        
-        let currentQuiz = null;
-        let userAnswers = {};
-        let score = 0;
+        <!-- Tab 2: History -->
+        <div id="history-tab" class="tab-content">
+            <section class="history-section">
+                <div class="history-header">
+                    <h2>📜 Quiz History</h2>
+                    <button onclick="refreshHistory()" class="btn-refresh">
+                        <span class="refresh-icon">🔄</span> Refresh
+                    </button>
+                </div>
 
-        // Set example URL
-        function setExample(topic) {
-            document.getElementById('wikipediaUrl').value = `https://en.wikipedia.org/wiki/${topic}`;
-        }
+                <!-- Loading State -->
+                <div id="history-loading" class="loading-container" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Loading quiz history...</p>
+                </div>
 
-        // Generate Quiz
-        document.getElementById('quizForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const url = document.getElementById('wikipediaUrl').value;
-            const num_questions = parseInt(document.getElementById('numQuestions').value);
-            const difficulty = document.getElementById('difficulty').value;
-            
-            // Show loading
-            document.getElementById('generator').classList.add('hidden');
-            document.getElementById('loading').classList.remove('hidden');
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/v2/articles/generate`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url, num_questions, difficulty })
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Failed to generate quiz');
-                }
-                
-                currentQuiz = await response.json();
-                displayQuiz();
-                
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('generator').classList.remove('hidden');
-            }
-        });
+                <!-- Empty State -->
+                <div id="history-empty" class="empty-state" style="display: none;">
+                    <div class="empty-icon">📭</div>
+                    <h3>No Quizzes Yet</h3>
+                    <p>Generate your first quiz to see it appear here!</p>
+                    <button onclick="switchTab('generate')" class="btn-primary">Generate Quiz</button>
+                </div>
 
-        // Display Quiz
-        function displayQuiz() {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('quizSection').classList.remove('hidden');
-            
-            // Set title and meta
-            document.getElementById('quizTitle').textContent = currentQuiz.article_title;
-            document.getElementById('quizMeta').textContent = 
-                `${currentQuiz.questions.length} questions`;
-            document.getElementById('score').textContent = `0/${currentQuiz.questions.length}`;
-            
-            // Render questions
-            const container = document.getElementById('questionsContainer');
-            container.innerHTML = '';
-            
-            currentQuiz.questions.forEach((q, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'glass rounded-xl shadow-lg p-6 question-card';
-                questionDiv.innerHTML = `
-                    <div class="mb-4">
-                        <div class="text-sm font-semibold text-purple-600 mb-2">Question ${q.id}</div>
-                        <h3 class="text-lg font-semibold text-gray-800">${q.question}</h3>
-                    </div>
-                    
-                    <div class="space-y-3" id="options-${q.id}">
-                        ${q.options.map((option, i) => `
-                            <button 
-                                onclick="selectAnswer(${q.id}, ${i})"
-                                id="option-${q.id}-${i}"
-                                class="option-btn w-full text-left px-4 py-3 rounded-lg border-2 border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition"
-                            >
-                                <span class="font-medium">${String.fromCharCode(65 + i)}.</span> ${option}
-                            </button>
-                        `).join('')}
-                    </div>
-                    
-                    <div id="explanation-${q.id}" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <div class="font-semibold text-blue-900 mb-1">💡 Explanation</div>
-                        <div class="text-blue-800">${q.explanation}</div>
-                    </div>
-                `;
-                container.appendChild(questionDiv);
-            });
-        }
+                <!-- History Table -->
+                <div id="history-table-wrapper" class="table-wrapper" style="display: none;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>URL</th>
+                                <th>Questions</th>
+                                <th>Generated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
 
-        // Select Answer
-        function selectAnswer(questionId, optionIndex) {
-            if (userAnswers[questionId] !== undefined) return; // Already answered
-            
-            const question = currentQuiz.questions.find(q => q.id === questionId);
-            const isCorrect = optionIndex === question.correct_answer;
-            
-            userAnswers[questionId] = optionIndex;
-            
-            // Update button styles
-            question.options.forEach((_, i) => {
-                const btn = document.getElementById(`option-${questionId}-${i}`);
-                btn.disabled = true;
-                btn.classList.remove('hover:border-purple-400', 'hover:bg-purple-50');
-                
-                if (i === question.correct_answer) {
-                    btn.classList.add('correct-answer');
-                } else if (i === optionIndex && !isCorrect) {
-                    btn.classList.add('wrong-answer');
-                } else {
-                    btn.classList.add('opacity-50');
-                }
-            });
-            
-            // Show explanation
-            document.getElementById(`explanation-${questionId}`).classList.remove('hidden');
-            
-            // Update score
-            if (isCorrect) score++;
-            document.getElementById('score').textContent = `${score}/${currentQuiz.questions.length}`;
-            
-            // Check if quiz is complete
-            if (Object.keys(userAnswers).length === currentQuiz.questions.length) {
-                setTimeout(showResults, 1000);
-            }
-        }
+    <!-- Modal for Quiz Details -->
+    <div id="quiz-modal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeQuizModal()"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="modal-title">Quiz Details</h2>
+                <button class="modal-close" onclick="closeQuizModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer">
+                <button onclick="closeQuizModal()" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
 
-        // Show Results
-        function showResults() {
-            const percentage = Math.round((score / currentQuiz.questions.length) * 100);
-            document.getElementById('finalScore').textContent = `${score}/${currentQuiz.questions.length} (${percentage}%)`;
-            
-            let message = '';
-            if (percentage >= 90) message = '🌟 Outstanding! You\'re a master of this topic!';
-            else if (percentage >= 70) message = '🎯 Great job! You have a solid understanding!';
-            else if (percentage >= 50) message = '👍 Good effort! Keep learning!';
-            else message = '📚 Keep studying! You\'ll improve with practice!';
-            
-            document.getElementById('resultMessage').textContent = message;
-            document.getElementById('results').classList.remove('hidden');
-            
-            // Scroll to results
-            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
-        }
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>

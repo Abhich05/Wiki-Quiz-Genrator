@@ -1,374 +1,545 @@
-# 🧠 Wiki Quiz Generator - AI-Powered Learning Platform
+# 📚 Wikipedia Quiz Generator - Complete Implementation
 
-**Generate unlimited quizzes from any Wikipedia article using Google Gemini AI!**
-
-![Status](https://img.shields.io/badge/status-production--ready-success)
-![AI](https://img.shields.io/badge/AI-Google%20Gemini%202.0-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-
----
+An AI-powered quiz generation system that extracts content from Wikipedia articles, identifies key entities (people, organizations, locations), and generates comprehensive quizzes using Google Gemini 2.0 Flash. Features include entity extraction, section-aware question generation, quiz history tracking, and interactive quiz taking.
 
 ## ✨ Features
 
-- 🤖 **Google Gemini 2.0 Flash AI** - State-of-the-art question generation
-- 📚 **Wikipedia Integration** - Use any Wikipedia article
-- 🎯 **3 Difficulty Levels** - Easy, Medium, Hard
-- 📊 **1-20 Questions** - Customize quiz length
-- 💡 **Detailed Explanations** - Learn from each question
-- 🎨 **Beautiful UI** - Modern, responsive design
-- ⚡ **Real-time Scoring** - Instant feedback
-- 🌐 **RESTful API** - Easy integration
+### **Core Functionality**
+- 🔍 **Entity Extraction**: Automatically identifies people, organizations, and locations from Wikipedia articles
+- 📑 **Section Analysis**: Extracts article structure and section hierarchy
+- 🤖 **AI-Powered Quiz Generation**: Uses Google Gemini 2.0 Flash with grounding prompts to minimize hallucination
+- 💾 **Database Persistence**: PostgreSQL database for storing articles, quizzes, questions, and attempts
+- 📊 **History Tracking**: View all past quizzes with detailed statistics
+- 🎯 **Interactive Quiz Mode**: Take quizzes with instant scoring and explanations
+- 🔗 **Related Topics**: Suggests related Wikipedia articles for further exploration
+- 📖 **Study Guide Mode**: View all questions with answers and explanations
 
----
+### **Technical Highlights**
+- **Grounded Generation**: AI prompts explicitly reference article sections to prevent hallucination
+- **Entity Classification**: Heuristic-based entity extraction using Wikipedia link analysis
+- **Difficulty Levels**: Questions categorized as Easy, Medium, or Hard
+- **Comprehensive Explanations**: Each answer includes context from the source article
+- **Caching**: Prevents duplicate scraping of previously processed URLs
+- **Two-Tab Interface**: Separate views for generating quizzes and viewing history
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-### Prerequisites
-- Python 3.11+
-- Google API Key ([Get it free](https://makersuite.google.com/app/apikey))
-
-### Installation
-
-1. **Clone or Download** this repository
-
-2. **Install Dependencies**
-```bash
-cd backend
-pip install -r requirements_prod.txt
+```
+wiki-quiz-generator/
+├── backend/
+│   ├── main_complete.py          # FastAPI application with 7 endpoints
+│   ├── db_models.py               # SQLAlchemy models (4 tables)
+│   ├── database.py                # Database configuration
+│   ├── wikipedia_service.py      # Enhanced scraping with entity extraction
+│   ├── ai_service.py              # AI service with grounded prompts
+│   ├── requirements_full.txt     # Complete dependencies
+│   └── .env                       # Configuration (DATABASE_URL, GOOGLE_API_KEY)
+├── frontend/
+│   ├── index_enhanced.html        # Two-tab UI (Generate + History)
+│   ├── app_enhanced.js            # Complete frontend logic
+│   └── style_enhanced.css         # Comprehensive styling
+└── README_COMPLETE.md             # This file
 ```
 
-3. **Configure Environment**
+## 📊 Database Schema
 
-Create `backend/.env` file:
+### **WikiArticle**
+- Stores scraped Wikipedia content
+- Fields: url, title, summary, content, raw_html, key_entities (JSON), sections (JSON), related_topics (JSON)
+- Entity structure: `{people: [], organizations: [], locations: []}`
+
+### **Quiz**
+- Quiz metadata and generation info
+- Fields: article_id (FK), total_questions, difficulty_distribution (JSON), generation_time
+- Linked to WikiArticle (cascade delete)
+
+### **QuizQuestion**
+- Individual quiz questions
+- Fields: quiz_id (FK), question_text, option_a/b/c/d, correct_answer, explanation, difficulty, section_reference
+- Supports difficulty levels: Easy, Medium, Hard
+
+### **QuizAttempt**
+- User quiz attempts with scoring
+- Fields: quiz_id (FK), answers (JSON), score, percentage, time_taken
+- Tracks performance over time
+
+## 🚀 Setup Instructions
+
+### **Prerequisites**
+- Python 3.10 or higher
+- PostgreSQL 13+ (or SQLite for development)
+- Google API Key for Gemini (free tier available at [Google AI Studio](https://makersuite.google.com/app/apikey))
+
+### **Backend Setup**
+
+1. **Clone the repository**
+```powershell
+git clone https://github.com/Abhich05/Wiki-Quiz-Genrator.git
+cd Wiki-Quiz-Genrator/backend
+```
+
+2. **Create and activate virtual environment**
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+3. **Install dependencies**
+```powershell
+pip install -r requirements_full.txt
+```
+
+4. **Configure environment variables**
+```powershell
+# Copy template
+Copy-Item .env.example .env
+
+# Edit .env file with your configuration
+notepad .env
+```
+
+Required variables:
 ```env
 GOOGLE_API_KEY=your-google-api-key-here
-PORT=8000
-HOST=127.0.0.1
+DATABASE_URL=postgresql://user:password@localhost:5432/wiki_quiz
+# For SQLite (development): DATABASE_URL=sqlite:///./wiki_quiz.db
 ```
 
-4. **Start the Server**
+5. **Set up PostgreSQL (Production)**
 
-**Option A: Using Scripts**
-- Windows: Double-click `start_production.bat`
-- PowerShell: `.\start_production.ps1`
+**Option A: Local PostgreSQL**
+```powershell
+# Install PostgreSQL
+winget install PostgreSQL.PostgreSQL
 
-**Option B: Manual**
-```bash
-cd backend
-python main.py
+# Create database
+psql -U postgres
+CREATE DATABASE wiki_quiz;
+CREATE USER quiz_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE wiki_quiz TO quiz_user;
+\q
+
+# Update DATABASE_URL in .env
+# DATABASE_URL=postgresql://quiz_user:your_password@localhost:5432/wiki_quiz
 ```
 
-5. **Open Frontend**
-
-Double-click `frontend/app.html` or open in browser.
-
----
-
-## 📖 Usage
-
-### Via Web Interface
-
-1. **Open** `frontend/app.html` in your browser
-2. **Enter** any Wikipedia URL (e.g., `https://en.wikipedia.org/wiki/Python_(programming_language)`)
-3. **Select** number of questions (1-20)
-4. **Choose** difficulty level (Easy/Medium/Hard)
-5. **Click** "Generate Quiz with AI"
-6. **Take the quiz** and see your score!
-
-### Via API
-
-```bash
-curl -X POST "http://localhost:8000/api/v2/articles/generate" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://en.wikipedia.org/wiki/Artificial_intelligence",
-    "num_questions": 5,
-    "difficulty": "medium"
-  }'
+**Option B: SQLite (Development)**
+```env
+# In .env file
+DATABASE_URL=sqlite:///./wiki_quiz.db
 ```
 
----
-
-## 📁 Project Structure
-
-```
-Wiki Quiz Generator/
-├── backend/
-│   ├── main.py                  # Production server
-│   ├── requirements_prod.txt    # Dependencies
-│   ├── .env                     # Configuration
-│   └── test_*.py               # Test scripts
-├── frontend/
-│   └── app.html                 # Production frontend
-├── start_production.bat         # Windows launcher
-├── start_production.ps1         # PowerShell launcher
-├── README.md                    # This file
-├── README_DEPLOY.md            # Deployment guide
-└── PRODUCTION_READY.md         # Production checklist
+6. **Initialize database**
+```powershell
+# Database tables are created automatically on first run
+python main_complete.py
 ```
 
----
-
-## 🎮 Example Quizzes
-
-Try these Wikipedia articles:
-- Python Programming: `/wiki/Python_(programming_language)`
-- Artificial Intelligence: `/wiki/Artificial_intelligence`
-- Quantum Computing: `/wiki/Quantum_computing`
-- Machine Learning: `/wiki/Machine_learning`
-- Climate Change: `/wiki/Climate_change`
-- History of Internet: `/wiki/History_of_the_Internet`
-
----
-
-## 🔧 API Documentation
-
-### Endpoints
-
-#### Health Check
-```http
-GET /
+7. **Run the backend**
+```powershell
+uvicorn main_complete:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-#### Generate Quiz
-```http
-POST /api/v2/articles/generate
-Content-Type: application/json
+Backend will be available at: http://localhost:8000
 
+### **Frontend Setup**
+
+1. **Navigate to frontend directory**
+```powershell
+cd ..\frontend
+```
+
+2. **Update API URL (if needed)**
+
+Edit `app_enhanced.js`:
+```javascript
+// For local development
+const API_BASE_URL = 'http://localhost:8000';
+
+// For production (Render)
+const API_BASE_URL = 'https://wiki-quiz-genrator-btjx.onrender.com';
+```
+
+3. **Serve frontend**
+
+**Option A: Python HTTP Server**
+```powershell
+python -m http.server 3000
+```
+
+**Option B: Live Server (VS Code Extension)**
+- Install "Live Server" extension in VS Code
+- Right-click `index_enhanced.html` → "Open with Live Server"
+
+**Option C: Static file server**
+```powershell
+npm install -g serve
+serve .
+```
+
+Frontend will be available at: http://localhost:3000/index_enhanced.html
+
+## 📡 API Endpoints
+
+### **POST /api/generate-quiz**
+Generate a quiz from a Wikipedia URL
+
+**Request:**
+```json
 {
-  "url": "https://en.wikipedia.org/wiki/Topic",
-  "num_questions": 5,
-  "difficulty": "medium"
+  "url": "https://en.wikipedia.org/wiki/Artificial_intelligence",
+  "force_regenerate": false  // Optional: bypass cache
 }
 ```
 
-#### Get Quiz
-```http
-GET /api/v2/quizzes/{quiz_id}
+**Response:**
+```json
+{
+  "id": 1,
+  "url": "https://en.wikipedia.org/wiki/Artificial_intelligence",
+  "title": "Artificial intelligence",
+  "summary": "Article summary...",
+  "key_entities": {
+    "people": ["Alan Turing", "John McCarthy"],
+    "organizations": ["MIT", "Stanford University"],
+    "locations": ["United States", "United Kingdom"]
+  },
+  "sections": [
+    {"title": "History", "level": 2},
+    {"title": "Applications", "level": 2}
+  ],
+  "quiz": [
+    {
+      "question": "Who is considered the father of AI?",
+      "option_a": "Alan Turing",
+      "option_b": "John McCarthy",
+      "option_c": "Marvin Minsky",
+      "option_d": "Herbert Simon",
+      "correct_answer": "B",
+      "explanation": "John McCarthy coined the term 'artificial intelligence' in 1956.",
+      "difficulty": "Easy",
+      "section_reference": "History"
+    }
+  ],
+  "related_topics": [
+    "Machine learning",
+    "Neural network",
+    "Deep learning"
+  ]
+}
 ```
 
-#### List Quizzes
-```http
-GET /api/v2/quizzes
+### **GET /api/quiz/{quiz_id}**
+Get detailed information for a specific quiz
+
+### **GET /api/quizzes**
+Get list of all generated quizzes (history)
+
+### **POST /api/quiz/attempt**
+Submit quiz attempt and get score
+
+**Request:**
+```json
+{
+  "quiz_id": 1,
+  "answers": {
+    "0": "A",
+    "1": "B",
+    "2": "C"
+  },
+  "time_taken": 180  // seconds
+}
 ```
 
-### Interactive Docs
-
-Visit `http://localhost:8000/docs` when server is running for Swagger UI.
-
----
-
-## 🚢 Deployment
-
-### Local Development
-```bash
-cd backend
-uvicorn main:app --reload --port 8000
+**Response:**
+```json
+{
+  "attempt_id": 1,
+  "quiz_id": 1,
+  "score": 2,
+  "total_questions": 3,
+  "percentage": 66.67,
+  "time_taken": 180
+}
 ```
 
-### Production Deployment
+### **DELETE /api/quiz/{quiz_id}**
+Delete a quiz and all associated data (cascade)
 
-#### Option 1: Render.com
-1. Push to GitHub
-2. Create Web Service on Render
-3. Set start command: `cd backend && python main.py`
-4. Add `GOOGLE_API_KEY` environment variable
-5. Deploy!
+### **GET /health**
+Health check endpoint
 
-#### Option 2: Railway.app
-1. Connect GitHub repository
-2. Set root directory: `backend`
-3. Add environment variables
-4. Auto-deploy
+### **GET /docs**
+Interactive API documentation (Swagger UI)
 
-#### Option 3: Docker
-```bash
-cd backend
-docker build -t wiki-quiz .
-docker run -p 8000:8000 --env-file .env wiki-quiz
-```
+## 🎯 Usage Guide
 
-See [README_DEPLOY.md](README_DEPLOY.md) for detailed deployment instructions.
+### **Generating a Quiz**
 
----
+1. Go to the "Generate Quiz" tab
+2. Enter a Wikipedia URL (e.g., `https://en.wikipedia.org/wiki/Python_(programming_language)`)
+3. Click "Generate Quiz"
+4. Wait for extraction (10-30 seconds depending on article length)
+5. View extracted entities, sections, and related topics
+6. Click "Take the Quiz" or "View as Study Guide"
 
-## ⚙️ Configuration
+### **Taking a Quiz**
 
-### Environment Variables
+1. Click "Take the Quiz" button
+2. Answer multiple-choice questions
+3. Track progress with the progress bar
+4. Click "Submit Answers"
+5. View score and detailed results
+6. See explanations for each question
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `GOOGLE_API_KEY` | ✅ Yes | - | Google Gemini API key |
-| `PORT` | No | 8000 | Server port |
-| `HOST` | No | 127.0.0.1 | Server host |
+### **Viewing History**
 
-### Frontend Configuration
-
-Update `API_BASE` in `frontend/app.html` (line 212) for production:
-```javascript
-const API_BASE = 'https://your-api-domain.com';
-```
-
----
+1. Switch to "Past Quizzes" tab
+2. See all generated quizzes in a table
+3. Click "View" to see quiz details in a modal
+4. Click "Delete" to remove a quiz
+5. Click "Refresh" to reload the list
 
 ## 🧪 Testing
 
-### Test Setup
-```bash
+### **Manual Testing**
+
+Test with these Wikipedia articles:
+- https://en.wikipedia.org/wiki/Artificial_intelligence
+- https://en.wikipedia.org/wiki/Python_(programming_language)
+- https://en.wikipedia.org/wiki/World_War_II
+- https://en.wikipedia.org/wiki/Albert_Einstein
+- https://en.wikipedia.org/wiki/Climate_change
+
+### **API Testing with curl**
+
+```powershell
+# Generate a quiz
+curl -X POST "http://localhost:8000/api/generate-quiz" `
+  -H "Content-Type: application/json" `
+  -d '{"url":"https://en.wikipedia.org/wiki/Python_(programming_language)"}'
+
+# Get quiz by ID
+curl "http://localhost:8000/api/quiz/1"
+
+# Get all quizzes
+curl "http://localhost:8000/api/quizzes"
+
+# Submit quiz attempt
+curl -X POST "http://localhost:8000/api/quiz/attempt" `
+  -H "Content-Type: application/json" `
+  -d '{"quiz_id":1,"answers":{"0":"A","1":"B"},"time_taken":120}'
+```
+
+### **Database Verification**
+
+```sql
+-- Check article count
+SELECT COUNT(*) FROM wiki_articles;
+
+-- View recent quizzes
+SELECT id, title, total_questions, created_at 
+FROM quizzes 
+ORDER BY created_at DESC LIMIT 10;
+
+-- Check entity extraction
+SELECT title, key_entities 
+FROM wiki_articles 
+WHERE key_entities IS NOT NULL;
+
+-- View quiz attempts
+SELECT quiz_id, score, percentage, time_taken 
+FROM quiz_attempts 
+ORDER BY created_at DESC;
+```
+
+## 🎨 Prompt Engineering
+
+### **Key Prompt Strategies**
+
+1. **Grounding**: Explicit instructions to use only article content
+2. **Section References**: Questions must cite source sections
+3. **Hallucination Prevention**: "DO NOT use external knowledge"
+4. **Structured Output**: JSON format with strict schema
+5. **Difficulty Distribution**: Balanced mix of Easy/Medium/Hard
+
+### **Quiz Generation Prompt** (from `ai_service.py`)
+```
+Generate {num_questions} multiple-choice quiz questions based on the following Wikipedia article.
+
+CRITICAL REQUIREMENTS:
+1. ALL questions MUST be directly answerable from the article content below
+2. DO NOT use external knowledge or information not in the article
+3. Each question must reference which section it comes from
+4. Generate questions of varying difficulty (Easy, Medium, Hard)
+5. Ensure questions test understanding, not just memorization
+
+Article sections provided:
+{sections}
+
+Article content:
+{content}
+
+For each question, provide:
+- Clear question text
+- 4 distinct answer options (A, B, C, D)
+- Correct answer (A, B, C, or D)
+- Explanation with section reference
+- Difficulty level (Easy, Medium, or Hard)
+
+Return as JSON array...
+```
+
+## 🚢 Deployment
+
+### **Render Deployment**
+
+**Backend:**
+1. Push to GitHub
+2. Create new Web Service on Render
+3. Connect to GitHub repository
+4. Configure:
+   - Build Command: `pip install -r backend/requirements_full.txt`
+   - Start Command: `cd backend && uvicorn main_complete:app --host 0.0.0.0 --port $PORT`
+   - Environment Variables: `GOOGLE_API_KEY`, `DATABASE_URL`
+4. Add PostgreSQL database (Render Dashboard → New PostgreSQL)
+5. Copy Internal Database URL to `DATABASE_URL` environment variable
+
+**Frontend:**
+1. Update `API_BASE_URL` in `app_enhanced.js` to Render URL
+2. Deploy as Static Site on Render or use GitHub Pages
+3. Point to `frontend/index_enhanced.html`
+
+### **Heroku Deployment**
+
+```powershell
+# Backend
 cd backend
-python test_setup.py
+heroku create wiki-quiz-backend
+heroku addons:create heroku-postgresql:mini
+heroku config:set GOOGLE_API_KEY=your_key
+git push heroku main
+
+# Frontend
+cd frontend
+heroku create wiki-quiz-frontend
+git push heroku main
 ```
 
-### Test Full AI Generation
-```bash
-python test_gemini_full.py
-```
+## 📈 Performance & Optimization
 
-### Test Wikipedia Scraping
-```bash
-python test_scraping.py
-```
-
----
-
-## 📊 Performance
-
-- **Generation Time:** 10-20 seconds per quiz
-- **Concurrent Users:** Supports multiple simultaneous users
-- **Storage:** In-memory (can add database)
-- **Rate Limits:** None (add for public deployment)
-
----
-
-## 🔒 Security
-
-For production deployment:
-- ✅ Use HTTPS
-- ✅ Add rate limiting
-- ✅ Implement authentication
-- ✅ Validate all inputs
-- ✅ Use environment variables
-- ✅ Enable CORS only for trusted domains
-
----
-
-## 🛠️ Tech Stack
-
-### Backend
-- **FastAPI** - Modern Python web framework
-- **Uvicorn** - ASGI server
-- **Google Gemini AI** - Question generation
-- **Beautiful Soup** - Wikipedia scraping
-- **Pydantic** - Data validation
-
-### Frontend
-- **Vanilla JavaScript** - No framework needed
-- **Tailwind CSS** - Utility-first styling
-- **HTML5** - Semantic markup
-
----
-
-## 📈 Future Enhancements
-
-- [ ] Database integration (PostgreSQL)
-- [ ] User accounts & authentication
-- [ ] Quiz sharing capabilities
-- [ ] Leaderboards & competitions
-- [ ] Multi-language support
-- [ ] Mobile app (React Native)
-- [ ] PDF export
-- [ ] Analytics dashboard
-- [ ] More AI model options
-- [ ] Custom quiz templates
-
----
+- **Caching**: URLs are cached in database; set `force_regenerate=true` to bypass
+- **Entity Extraction**: Uses heuristic patterns for fast classification
+- **Database Indexing**: Indexes on `url` (WikiArticle) and `quiz_id` (foreign keys)
+- **Connection Pooling**: SQLAlchemy engine with pool size 5, max overflow 10
+- **Async Processing**: FastAPI async endpoints for concurrent requests
 
 ## 🐛 Troubleshooting
 
-### Server Won't Start
-- Check Python version: `python --version` (need 3.11+)
-- Install dependencies: `pip install -r requirements_prod.txt`
-- Verify .env file exists with valid `GOOGLE_API_KEY`
+### **Common Issues**
 
-### "AI service not available"
-- Check `GOOGLE_API_KEY` is set in `.env`
-- Verify API key is valid at https://makersuite.google.com
-- Run `python test_setup.py` to verify configuration
+**Issue: "Failed to generate quiz"**
+- Check if Wikipedia URL is valid and accessible
+- Verify GOOGLE_API_KEY is set correctly
+- Check API rate limits (Gemini free tier: 60 requests/minute)
 
-### Frontend Can't Connect
-- Ensure server is running on http://localhost:8000
-- Check browser console (F12) for errors
-- Verify `API_BASE` URL in `app.html`
+**Issue: Database connection errors**
+- Verify DATABASE_URL format
+- For PostgreSQL: Ensure database exists and user has permissions
+- For SQLite: Check file permissions in backend directory
 
-### Quiz Generation Fails
-- Try a different Wikipedia article
-- Check article URL is valid
-- Some Wikipedia pages may not work (redirects, disambiguation)
+**Issue: Entity extraction returns empty arrays**
+- Some articles have minimal entity information
+- Entity extraction uses heuristics; may miss some entities
+- Check article HTML structure (infoboxes, linked text)
 
----
+**Issue: Frontend can't connect to backend**
+- Check API_BASE_URL in app_enhanced.js
+- Verify backend is running on correct port
+- Check CORS settings if using different domains
+
+## 📚 Dependencies
+
+### **Backend**
+```
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+google-generativeai>=0.3.0
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+alembic>=1.13.0
+pydantic>=2.0.0
+```
+
+### **Frontend**
+- Vanilla JavaScript (no build required)
+- CSS3 with modern features
+- No external dependencies
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/YourFeature`)
+3. Commit changes (`git commit -m 'Add YourFeature'`)
+4. Push to branch (`git push origin feature/YourFeature`)
+5. Open Pull Request
 
 ## 📝 License
 
-MIT License - feel free to use this project for learning or commercial purposes!
+This project is open source and available under the MIT License.
 
----
+## 👤 Author
+
+**Abhishek Choudhary**
+- GitHub: [@Abhich05](https://github.com/Abhich05)
+- Repository: [Wiki-Quiz-Genrator](https://github.com/Abhich05/Wiki-Quiz-Genrator)
 
 ## 🙏 Acknowledgments
 
-- **Google Gemini AI** - Powering intelligent question generation
-- **Wikipedia** - The free encyclopedia
-- **FastAPI** - Amazing Python framework
-- **Tailwind CSS** - Beautiful styling made easy
+- **Google Gemini 2.0 Flash**: AI model for quiz generation
+- **Wikipedia**: Content source and data provider
+- **FastAPI**: Modern Python web framework
+- **SQLAlchemy**: SQL toolkit and ORM
+- **BeautifulSoup**: HTML parsing library
+
+## 📸 Screenshots
+
+### Generate Quiz Tab
+![Generate Quiz](screenshots/generate-quiz.png)
+- URL input with validation
+- Entity extraction display
+- Section analysis
+- Related topics suggestions
+
+### Quiz Taking Mode
+![Take Quiz](screenshots/take-quiz.png)
+- Progress tracking
+- Multiple choice questions
+- Difficulty badges
+
+### Quiz Results
+![Quiz Results](screenshots/results.png)
+- Score visualization
+- Detailed explanations
+- Correct/incorrect breakdown
+
+### History Tab
+![History](screenshots/history.png)
+- Table of all quizzes
+- Quick actions (View, Delete)
+- Sortable columns
+
+### Quiz Details Modal
+![Details Modal](screenshots/modal.png)
+- Complete quiz information
+- All questions with answers
+- Entity and section data
 
 ---
 
-## 📞 Support
+**Project Status**: ✅ Complete and Production-Ready
 
-### Having Issues?
-
-1. Check [PRODUCTION_READY.md](PRODUCTION_READY.md) for setup verification
-2. Review [README_DEPLOY.md](README_DEPLOY.md) for deployment help
-3. Run `python backend/test_setup.py` to verify configuration
-4. Check server logs in terminal
-5. Inspect browser console (F12)
-
----
-
-## 🎉 Success Stories
-
-Generate quizzes on:
-- 🐍 **Python Programming** - Learn coding concepts
-- 🤖 **Artificial Intelligence** - Master AI fundamentals
-- ⚛️ **Quantum Physics** - Understand the quantum world
-- 🌍 **World History** - Test historical knowledge
-- 🧬 **Biology** - Study life sciences
-- 🎨 **Art History** - Explore artistic movements
-
-**Any topic on Wikipedia = Instant quiz!**
-
----
-
-## 🚀 Get Started Now!
-
-1. **Install dependencies:**
-   ```bash
-   cd backend
-   pip install -r requirements_prod.txt
-   ```
-
-2. **Add your Google API key** to `backend/.env`
-
-3. **Start the server:**
-   ```bash
-   python main.py
-   ```
-
-4. **Open** `frontend/app.html` in your browser
-
-5. **Generate your first AI-powered quiz!** 🎯
-
----
-
-**Made with ❤️ using Google Gemini AI & Wikipedia**
-
-*Start learning smarter, not harder!* 📚✨
+**Last Updated**: January 2025
