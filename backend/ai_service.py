@@ -19,8 +19,12 @@ class EnhancedAIService:
     """
     
     def __init__(self):
-        genai.configure(api_key=settings.google_api_key)
-        self.model = genai.GenerativeModel(settings.ai_model)
+        if not settings.google_api_key:
+            logger.warning("GOOGLE_API_KEY not set - AI features will not work")
+            self.model = None
+        else:
+            genai.configure(api_key=settings.google_api_key)
+            self.model = genai.GenerativeModel(settings.ai_model)
         self.generation_config = {
             "temperature": 0.7,
             "max_output_tokens": 4096,
@@ -49,6 +53,10 @@ class EnhancedAIService:
         """
         logger.info(f"Generating comprehensive quiz for: {title}")
         start_time = time.time()
+        
+        # Check if API key is configured
+        if not self.model:
+            raise Exception("GOOGLE_API_KEY not configured. Please set it in environment variables.")
         
         try:
             # Generate quiz questions

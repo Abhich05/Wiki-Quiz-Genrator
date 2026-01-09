@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     workers: int = 4
     
     # AI Configuration
-    google_api_key: str
+    google_api_key: Optional[str] = None  # Make optional for deployment
     ai_model: str = "gemini-2.0-flash-exp"
     ai_temperature: float = 0.7
     ai_max_tokens: int = 2048
