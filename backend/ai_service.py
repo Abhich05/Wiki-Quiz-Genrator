@@ -211,13 +211,13 @@ Generate the quiz now:"""
             # Remove newlines within strings but keep structure
             json_text = re.sub(r'(?<!\\)\n', ' ', json_text)
             
+            # Fix invalid escape sequences that AI commonly produces
+            json_text = json_text.replace("\\'", "'")  # \' is not valid JSON escape
+            json_text = json_text.replace("\\?", "?")  # \? is not valid JSON escape
+            
             # Fix trailing commas
             json_text = re.sub(r',\s*}', '}', json_text)
             json_text = re.sub(r',\s*]', ']', json_text)
-            
-            # Fix unescaped quotes in strings (common AI mistake)
-            # This is tricky - try to fix obvious patterns
-            json_text = re.sub(r'(?<=: ")([^"]*?)(?<!\\)"([^"]*?)(?=")', r'\1\'\2', json_text)
             
             try:
                 data = json.loads(json_text)
@@ -225,6 +225,8 @@ Generate the quiz now:"""
                 logger.error(f"JSON parse error at position {e.pos}: {json_text[max(0,e.pos-50):e.pos+50]}")
                 # Try one more fix - replace problematic characters
                 json_text = json_text.replace('\t', ' ')
+                json_text = json_text.replace("\\'", "'")  # Fix invalid escape for single quotes
+                json_text = json_text.replace("\\?", "?")  # Fix invalid escape for question marks
                 json_text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', json_text)
                 data = json.loads(json_text)
             
