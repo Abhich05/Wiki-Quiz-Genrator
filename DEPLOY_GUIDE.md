@@ -48,7 +48,7 @@ If you prefer manual setup:
    - **Root Directory**: Leave empty
    - **Build Command**: 
      ```bash
-     cd backend && pip install -r requirements.txt
+     cd backend && pip install -r requirements_prod.txt
      ```
    - **Start Command**: 
      ```bash
