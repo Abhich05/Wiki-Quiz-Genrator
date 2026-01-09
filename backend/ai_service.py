@@ -134,66 +134,40 @@ class EnhancedAIService:
         
         sections_text = ", ".join(sections[:10]) if sections else "N/A"
         
-        prompt = f"""You are an expert quiz generator. Create a high-quality educational quiz about "{title}" based STRICTLY on the provided Wikipedia article content.
+        prompt = f"""You are an expert quiz generator. Create a quiz about "{title}" based on the Wikipedia article content below.
 
-**CRITICAL INSTRUCTIONS:**
-1. ALL questions MUST be directly answerable from the article content provided below
-2. DO NOT use external knowledge or make assumptions
-3. If you reference a fact, it MUST appear in the article text
-4. Include the section name where the information can be found
-5. Generate EXACTLY {num_questions} questions with varied difficulty
+IMPORTANT: Return ONLY valid JSON. No markdown, no explanation, just the JSON object.
+- Use double quotes for all strings
+- Escape any quotes inside strings with backslash
+- Do not use single quotes
+- No trailing commas
 
-**ARTICLE INFORMATION:**
+Generate {num_questions} multiple-choice questions.
 
-**Title:** {title}
+Article Title: {title}
+Article Content: {content}
 
-**Summary:**
-{summary}
-
-**Available Sections:** {sections_text}
-
-**Full Article Content:**
-{content}
-
-**QUIZ REQUIREMENTS:**
-
-Generate {num_questions} multiple-choice questions with this distribution:
-- {num_questions // 3} EASY questions (basic facts, definitions from early sections)
-- {num_questions // 3} MEDIUM questions (requiring understanding and connection of concepts)
-- {num_questions - 2 * (num_questions // 3)} HARD questions (requiring analysis, synthesis, or deep comprehension)
-
-**EACH QUESTION MUST INCLUDE:**
-1. **question**: Clear, specific question text
-2. **options**: Array of exactly 4 options [A, B, C, D]
-3. **answer**: The correct option (must be one of the 4 options)
-4. **difficulty**: "easy", "medium", or "hard"
-5. **explanation**: 1-2 sentence explanation with reference to article section
-6. **section**: Which article section this relates to (from sections list above)
-
-**QUALITY STANDARDS:**
-- Questions should test different aspects of the topic
-- Wrong answers (distractors) should be plausible but clearly incorrect
-- Avoid "all of the above" or "none of the above" options
-- Avoid trick questions or ambiguous wording
-- Ensure factual accuracy by grounding in article text
-
-**OUTPUT FORMAT:**
-Return ONLY valid JSON with no markdown formatting or extra text. Ensure all strings are properly escaped and all commas are correctly placed.
-
+Return this exact JSON structure:
 {{
   "questions": [
     {{
-      "question": "Question text here?",
+      "question": "What is the question?",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "answer": "Option A",
       "difficulty": "easy",
-      "explanation": "Brief explanation referencing the article section.",
-      "section": "Section name from article"
+      "explanation": "Brief explanation.",
+      "section": "General"
     }}
   ]
 }}
 
-Generate the quiz now in valid JSON format:"""
+Rules:
+- Each question has exactly 4 options
+- answer must match one of the options exactly  
+- difficulty is "easy", "medium", or "hard"
+- Return ONLY the JSON, nothing else
+
+Generate the quiz now:"""
         
         return prompt
     
@@ -203,6 +177,7 @@ Generate the quiz now in valid JSON format:"""
         try:
             # Clean the response text
             response_text = response_text.strip()
+            logger.debug(f"Raw AI response (first 500 chars): {response_text[:500]}")
             
             # Try multiple extraction methods
             json_text = None
@@ -212,25 +187,47 @@ Generate the quiz now in valid JSON format:"""
             if json_match:
                 json_text = json_match.group(1).strip()
             
-            # Method 2: Find JSON object
+            # Method 2: Find JSON object with balanced braces
             if not json_text:
-                json_match = re.search(r'\{.*?"questions".*?\[.*?\].*?\}', response_text, re.DOTALL)
-                if json_match:
-                    json_text = json_match.group(0)
-            
-            # Method 3: Use entire response if it looks like JSON
-            if not json_text and response_text.startswith('{'):
-                json_text = response_text
+                # Find first { and match to closing }
+                start = response_text.find('{')
+                if start != -1:
+                    brace_count = 0
+                    end = start
+                    for i, c in enumerate(response_text[start:], start):
+                        if c == '{':
+                            brace_count += 1
+                        elif c == '}':
+                            brace_count -= 1
+                            if brace_count == 0:
+                                end = i + 1
+                                break
+                    json_text = response_text[start:end]
             
             if not json_text:
                 raise ValueError("No JSON found in response")
             
             # Clean common JSON issues
-            json_text = json_text.replace('\n', ' ')
-            json_text = re.sub(r',\s*}', '}', json_text)  # Remove trailing commas
-            json_text = re.sub(r',\s*]', ']', json_text)  # Remove trailing commas in arrays
+            # Remove newlines within strings but keep structure
+            json_text = re.sub(r'(?<!\\)\n', ' ', json_text)
             
-            data = json.loads(json_text)
+            # Fix trailing commas
+            json_text = re.sub(r',\s*}', '}', json_text)
+            json_text = re.sub(r',\s*]', ']', json_text)
+            
+            # Fix unescaped quotes in strings (common AI mistake)
+            # This is tricky - try to fix obvious patterns
+            json_text = re.sub(r'(?<=: ")([^"]*?)(?<!\\)"([^"]*?)(?=")', r'\1\'\2', json_text)
+            
+            try:
+                data = json.loads(json_text)
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON parse error at position {e.pos}: {json_text[max(0,e.pos-50):e.pos+50]}")
+                # Try one more fix - replace problematic characters
+                json_text = json_text.replace('\t', ' ')
+                json_text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', json_text)
+                data = json.loads(json_text)
+            
             questions = data.get('questions', [])
             
             # Validate and clean questions
