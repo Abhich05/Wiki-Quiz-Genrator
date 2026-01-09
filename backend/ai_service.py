@@ -177,8 +177,9 @@ Generate {num_questions} multiple-choice questions with this distribution:
 - Avoid trick questions or ambiguous wording
 - Ensure factual accuracy by grounding in article text
 
-**OUTPUT FORMAT (JSON):**
-```json
+**OUTPUT FORMAT:**
+Return ONLY valid JSON with no markdown formatting or extra text. Ensure all strings are properly escaped and all commas are correctly placed.
+
 {{
   "questions": [
     {{
@@ -191,9 +192,8 @@ Generate {num_questions} multiple-choice questions with this distribution:
     }}
   ]
 }}
-```
 
-Generate the quiz now, ensuring ALL information comes from the article above:"""
+Generate the quiz now in valid JSON format:
         
         return prompt
     
@@ -201,16 +201,34 @@ Generate the quiz now, ensuring ALL information comes from the article above:"""
         """Parse AI response into structured quiz questions"""
         
         try:
-            # Extract JSON from response
-            json_match = re.search(r'```json\s*(.*?)\s*```', response_text, re.DOTALL)
+            # Clean the response text
+            response_text = response_text.strip()
+            
+            # Try multiple extraction methods
+            json_text = None
+            
+            # Method 1: Extract from code blocks
+            json_match = re.search(r'```(?:json)?\s*(.*?)\s*```', response_text, re.DOTALL)
             if json_match:
-                json_text = json_match.group(1)
-            else:
-                json_match = re.search(r'\{.*"questions".*\}', response_text, re.DOTALL)
+                json_text = json_match.group(1).strip()
+            
+            # Method 2: Find JSON object
+            if not json_text:
+                json_match = re.search(r'\{.*?"questions".*?\[.*?\].*?\}', response_text, re.DOTALL)
                 if json_match:
                     json_text = json_match.group(0)
-                else:
-                    json_text = response_text
+            
+            # Method 3: Use entire response if it looks like JSON
+            if not json_text and response_text.startswith('{'):
+                json_text = response_text
+            
+            if not json_text:
+                raise ValueError("No JSON found in response")
+            
+            # Clean common JSON issues
+            json_text = json_text.replace('\n', ' ')
+            json_text = re.sub(r',\s*}', '}', json_text)  # Remove trailing commas
+            json_text = re.sub(r',\s*]', ']', json_text)  # Remove trailing commas in arrays
             
             data = json.loads(json_text)
             questions = data.get('questions', [])
